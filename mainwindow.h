@@ -15,6 +15,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    void pushClipboard();
+    void popClipboard();
+
 private:
     Ui::MainWindow *ui;
 };
