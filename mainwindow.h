@@ -2,6 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMimeData>
+#include <QClipboard>
+#include <QStringList>
 
 namespace Ui {
 class MainWindow;
@@ -20,6 +23,13 @@ public:
 
 private:
     Ui::MainWindow *ui;
+
+    QStringList multiple_buffer;
+    QClipboard *clipboard;
+    const QMimeData *mime_data;
+
+    void clipboardDataChanged();
+
 };
 
 #endif // MAINWINDOW_H

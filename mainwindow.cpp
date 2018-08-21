@@ -7,6 +7,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    clipboard = QApplication::clipboard();
+
+    QObject::connect(clipboard, &QClipboard::dataChanged, this, clipboardDataChanged);
 
     QAction *ctrlC_1 = new QAction(this);
     ctrlC_1->setShortcut(Qt::CTRL | Qt::Key_1);
@@ -26,10 +29,24 @@ MainWindow::~MainWindow()
 
 void MainWindow::pushClipboard()
 {
-    std::cout << "copied" << std::endl;
+    mime_data = clipboard->mimeData();
+    if (mime_data->hasText()) {
+        multiple_buffer.prepend(mime_data->text());
+    }
+    std::cout << "push" << std::endl;
 }
 
 void MainWindow::popClipboard()
 {
-    std::cout << "passed" << std::endl;
+    if(!multiple_buffer.isEmpty())
+        clipboard->setText(multiple_buffer.takeLast());
+    std::cout << "pop" << std::endl;
+}
+
+void MainWindow::clipboardDataChanged()
+{
+ //   mime_data = clipboard->mimeData();
+ //   if (mime_data->hasText()) {
+ //       multiple_buffer.append(mime_data->text());
+ //   }
 }
