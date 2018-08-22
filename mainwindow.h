@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include <QMimeData>
 #include <QClipboard>
-#include <QStringList>
 
 namespace Ui {
 class MainWindow;
@@ -18,17 +17,19 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void pushClipboard();
-    void popClipboard();
+    void pushClipboard(unsigned index);
+    void popClipboard(unsigned index);
 
 private:
     Ui::MainWindow *ui;
 
-    QStringList multiple_buffer;
+    QVector<QString> multiple_buffer;
+
     QClipboard *clipboard;
     const QMimeData *mime_data;
 
     void clipboardDataChanged();
+    void keyPressEvent(QKeyEvent *event);
 
 };
 
