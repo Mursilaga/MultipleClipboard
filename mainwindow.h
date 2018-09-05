@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMimeData>
 #include <QClipboard>
+#include <QSystemTrayIcon>
 
 namespace Ui {
 class MainWindow;
@@ -28,8 +29,20 @@ private:
     QClipboard *clipboard;
     const QMimeData *mime_data;
 
+    QMenu *trayIconMenu;
+    QAction *minimizeAction;
+    QAction *restoreAction;
+    QAction *quitAction;
+    QSystemTrayIcon *trayIcon;
+
     void clipboardDataChanged();
     void keyPressEvent(QKeyEvent *event);
+
+    void changeEvent(QEvent*);
+    void trayIconActivated(QSystemTrayIcon::ActivationReason reason);
+    void trayActionExecute();
+    void setTrayIconActions();
+    void showTrayIcon();
 
 };
 
