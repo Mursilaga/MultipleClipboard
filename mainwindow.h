@@ -5,6 +5,7 @@
 #include <QMimeData>
 #include <QClipboard>
 #include <QSystemTrayIcon>
+#include "windows.h"
 
 namespace Ui {
 class MainWindow;
@@ -36,13 +37,14 @@ private:
     QSystemTrayIcon *trayIcon;
 
     void clipboardDataChanged();
-    void keyPressEvent(QKeyEvent *event);
 
-    void changeEvent(QEvent*);
     void trayIconActivated(QSystemTrayIcon::ActivationReason reason);
     void trayActionExecute();
     void setTrayIconActions();
     void showTrayIcon();
+
+    void changeEvent(QEvent*);
+    bool nativeEvent(const QByteArray &eventType, void *message, long *result);
 
 };
 

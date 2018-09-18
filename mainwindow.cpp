@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <iostream>
 #include <QKeyEvent>
+#include <QMessageBox>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -10,6 +11,13 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setTrayIconActions();
     this->showTrayIcon();
 
+    for (int i=1; i<=9; i++) {
+        RegisterHotKey(HWND(winId()), i, MOD_CONTROL, 0x30 + i);
+    }
+
+    for (int i=1; i<=9; i++) {
+        RegisterHotKey(HWND(winId()), 10+i, MOD_ALT, 0x30 + i);
+    }
     clipboard = QApplication::clipboard();
     QObject::connect(clipboard, &QClipboard::dataChanged, this, clipboardDataChanged);
 
@@ -21,60 +29,21 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::keyPressEvent(QKeyEvent *event)
-{
-    if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_1)
-        pushClipboard(1);
-    else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_2)
-        pushClipboard(2);
-    else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_3)
-        pushClipboard(3);
-    else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_4)
-        pushClipboard(4);
-    else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_5)
-        pushClipboard(5);
-    else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_6)
-        pushClipboard(6);
-    else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_7)
-        pushClipboard(7);
-    else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_8)
-        pushClipboard(8);
-    else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_9)
-        pushClipboard(9);
-
-    else if(event->modifiers() == Qt::ALT && event->key() == Qt::Key_1)
-        popClipboard(1);
-    else if(event->modifiers() == Qt::ALT && event->key() == Qt::Key_2)
-        popClipboard(2);
-    else if(event->modifiers() == Qt::ALT && event->key() == Qt::Key_3)
-        popClipboard(3);
-    else if(event->modifiers() == Qt::ALT && event->key() == Qt::Key_4)
-        popClipboard(4);
-    else if(event->modifiers() == Qt::ALT && event->key() == Qt::Key_5)
-        popClipboard(5);
-    else if(event->modifiers() == Qt::ALT && event->key() == Qt::Key_6)
-        popClipboard(6);
-    else if(event->modifiers() == Qt::ALT && event->key() == Qt::Key_7)
-        popClipboard(7);
-    else if(event->modifiers() == Qt::ALT && event->key() == Qt::Key_8)
-        popClipboard(8);
-    else if(event->modifiers() == Qt::ALT && event->key() == Qt::Key_9)
-        popClipboard(9);
-}
 void MainWindow::pushClipboard(unsigned index)
 {
     mime_data = clipboard->mimeData();
     if(mime_data->hasText()) {
         multiple_buffer[index] = mime_data->text();
     }
-    std::cout << "push to " << index << std::endl;
+    QMessageBox::information(this, "Push", "Push to " + QString::number(index));
 }
 
 void MainWindow::popClipboard(unsigned index)
 {
+    index-=10; //keys id for pop differ on 10 from push
     if(!multiple_buffer.isEmpty())
         clipboard->setText(multiple_buffer[index]);
-    std::cout << "pop from " << index << std::endl;
+    QMessageBox::information(this, "Pop", "Pop from " + QString::number(index));
 }
 
 void MainWindow::clipboardDataChanged()
@@ -107,7 +76,7 @@ void MainWindow::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
     {
         case QSystemTrayIcon::Trigger:
         case QSystemTrayIcon::DoubleClick:
-            this -> trayActionExecute();
+            this->trayActionExecute();
             break;
         default:
             break;
@@ -140,4 +109,21 @@ void MainWindow::changeEvent(QEvent *event)
             this->hide();
         }
     }
+}
+
+bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
+{
+    Q_UNUSED(eventType);
+    Q_UNUSED(result);
+    MSG *msg = static_cast<MSG*>(message);
+    if(msg->message == WM_HOTKEY) {
+        if(msg->lParam & MOD_CONTROL) {
+            pushClipboard((unsigned)msg->wParam);
+        }
+        else if (msg->lParam & MOD_ALT) {
+            popClipboard((unsigned)msg->wParam);
+        }
+        return true;
+    }
+        return false;
 }
