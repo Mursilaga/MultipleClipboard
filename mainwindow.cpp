@@ -11,17 +11,20 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setTrayIconActions();
     this->showTrayIcon();
 
-    for (int i=1; i<=9; i++) {
+    for (int i=1; i<=9; i++)
+    {
         RegisterHotKey(HWND(winId()), i, MOD_CONTROL, 0x30 + i);
     }
 
-    for (int i=1; i<=9; i++) {
+    for (int i=1; i<=9; i++)
+    {
         RegisterHotKey(HWND(winId()), 10+i, MOD_ALT, 0x30 + i);
     }
     clipboard = QApplication::clipboard();
     QObject::connect(clipboard, &QClipboard::dataChanged, this, clipboardDataChanged);
 
     multiple_buffer.resize(10);
+    isWindowHidden = false;
 }
 
 MainWindow::~MainWindow()
@@ -32,18 +35,21 @@ MainWindow::~MainWindow()
 void MainWindow::pushClipboard(unsigned index)
 {
     mime_data = clipboard->mimeData();
-    if(mime_data->hasText()) {
+    if(mime_data->hasText())
+    {
         multiple_buffer[index] = mime_data->text();
     }
-    QMessageBox::information(this, "Push", "Push to " + QString::number(index));
+    //QMessageBox::information(this, "Push", "Push to " + QString::number(index));
 }
 
 void MainWindow::popClipboard(unsigned index)
 {
     index-=10; //keys id for pop differ on 10 from push
     if(!multiple_buffer.isEmpty())
+    {
         clipboard->setText(multiple_buffer[index]);
-    QMessageBox::information(this, "Pop", "Pop from " + QString::number(index));
+    }
+    //QMessageBox::information(this, "Pop", "Pop from " + QString::number(index));
 }
 
 void MainWindow::clipboardDataChanged()
@@ -67,7 +73,21 @@ void MainWindow::showTrayIcon()
 
 void MainWindow::trayActionExecute()
 {
-    std::cout << "trayActionExecute" << std::endl;
+    if(isWindowHidden)
+    {
+        isWindowHidden = false;
+        trayIconMenu->addAction(minimizeAction);
+        trayIconMenu->removeAction(restoreAction);
+        emit(restoreAction->triggered());
+    }
+    else
+    {
+        isWindowHidden = true;
+        trayIconMenu->addAction(restoreAction);
+        trayIconMenu->removeAction(minimizeAction);
+        emit(minimizeAction->triggered());
+    }
+
 }
 
 void MainWindow::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
@@ -85,9 +105,9 @@ void MainWindow::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::setTrayIconActions()
 {
-    minimizeAction = new QAction("Свернуть", this);
-    restoreAction = new QAction("Восстановить", this);
-    quitAction = new QAction("Выход", this);
+    minimizeAction = new QAction("Minimize", this);
+    restoreAction = new QAction("Restore", this);
+    quitAction = new QAction("Quit", this);
 
     connect(minimizeAction, &QAction::triggered, this, hide);
     connect(restoreAction, &QAction::triggered, this, showNormal);
@@ -95,7 +115,6 @@ void MainWindow::setTrayIconActions()
 
     trayIconMenu = new QMenu(this);
     trayIconMenu->addAction(minimizeAction);
-    trayIconMenu->addAction(restoreAction);
     trayIconMenu->addAction(quitAction);
 }
 
@@ -116,11 +135,14 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
     Q_UNUSED(eventType);
     Q_UNUSED(result);
     MSG *msg = static_cast<MSG*>(message);
-    if(msg->message == WM_HOTKEY) {
-        if(msg->lParam & MOD_CONTROL) {
+    if(msg->message == WM_HOTKEY)
+    {
+        if(msg->lParam & MOD_CONTROL)
+        {
             pushClipboard((unsigned)msg->wParam);
         }
-        else if (msg->lParam & MOD_ALT) {
+        else if (msg->lParam & MOD_ALT)
+        {
             popClipboard((unsigned)msg->wParam);
         }
         return true;

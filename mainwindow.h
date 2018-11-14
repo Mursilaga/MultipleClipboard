@@ -46,6 +46,8 @@ private:
     void changeEvent(QEvent*);
     bool nativeEvent(const QByteArray &eventType, void *message, long *result);
 
+    bool isWindowHidden;
+
 };
 
 #endif // MAINWINDOW_H
