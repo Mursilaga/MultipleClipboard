@@ -64,7 +64,7 @@ void MainWindow::clipboardDataChanged()
 void MainWindow::showTrayIcon()
 {
     trayIcon = new QSystemTrayIcon(this);
-    QIcon trayImage(":/images/arrow.png");
+    QIcon trayImage(":/images/tray_icon.png");
     trayIcon->setIcon(trayImage);
     trayIcon->setContextMenu(trayIconMenu);
     connect(trayIcon, &QSystemTrayIcon::activated, this, trayIconActivated);
